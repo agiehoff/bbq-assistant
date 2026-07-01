@@ -53,6 +53,17 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
+function fmtDuration(seconds) {
+  const s = Math.round(parseFloat(seconds));
+  if (isNaN(s) || s < 0) return "–";
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h} Std. ${m} Min.`;
+  if (m > 0) return `${m} Min. ${sec} Sek.`;
+  return `${sec} Sek.`;
+}
+
 function fmtTemp(hass, entityId, fallback = "–") {
   const n = getNumeric(hass, entityId);
   if (n === null) return fallback;
@@ -298,28 +309,6 @@ class MeaterCard extends HTMLElement {
           transform: translateX(-1px);
         }
 
-        /* ---- Footer ---- */
-        .footer {
-          display: flex;
-          justify-content: center;
-          gap: 18px;
-          margin-top: 12px;
-          padding-top: 10px;
-          border-top: 1px solid var(--divider-color, rgba(127,127,127,0.15));
-        }
-        .footer-item {
-          display: flex;
-          align-items: baseline;
-          gap: 4px;
-          font-size: 12px;
-        }
-        .footer-item .flabel {
-          color: var(--secondary-text-color);
-        }
-        .footer-item .fvalue {
-          color: var(--primary-text-color);
-          font-weight: 500;
-        }
         .hidden { display: none !important; }
       </style>
       <ha-card>
@@ -360,20 +349,6 @@ class MeaterCard extends HTMLElement {
           </div>
         </div>
 
-        <div class="footer" id="footer">
-          <div class="footer-item hidden" id="foot-peak">
-            <ha-icon icon="mdi:thermometer-high" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
-            <span class="fvalue" id="v-peak">–</span>
-          </div>
-          <div class="footer-item hidden" id="foot-elapsed">
-            <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
-            <span class="fvalue" id="v-elapsed">–</span>
-          </div>
-          <div class="footer-item hidden" id="foot-remaining">
-            <ha-icon icon="mdi:timer-sand" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
-            <span class="fvalue" id="v-remaining">–</span>
-          </div>
-        </div>
       </ha-card>
     `;
     this._els = {
@@ -388,12 +363,6 @@ class MeaterCard extends HTMLElement {
       progressTarget: root.getElementById("progress-target"),
       centerLine1: root.getElementById("center-line1"),
       centerLine2: root.getElementById("center-line2"),
-      footPeak: root.getElementById("foot-peak"),
-      vPeak: root.getElementById("v-peak"),
-      footElapsed: root.getElementById("foot-elapsed"),
-      vElapsed: root.getElementById("v-elapsed"),
-      footRemaining: root.getElementById("foot-remaining"),
-      vRemaining: root.getElementById("v-remaining"),
     };
     this._built = true;
   }
@@ -474,7 +443,7 @@ class MeaterCard extends HTMLElement {
       remainingRaw &&
       !["unbekannt", "unknown", "0"].includes(remainingRaw.toLowerCase())
     ) {
-      els.centerLine1.textContent = `Noch ${remainingRaw}`;
+      els.centerLine1.textContent = `Noch ${fmtDuration(remainingRaw)}`;
       els.centerLine2.textContent =
         innenVal !== null && zielVal !== null
           ? `${fmtTemp(hass, cfg.entity_innen)} von ${fmtTemp(hass, cfg.entity_ziel)}`
@@ -487,22 +456,6 @@ class MeaterCard extends HTMLElement {
       els.centerLine2.textContent = "";
     }
 
-    // Footer
-    const showPeak = cfg.entity_peak && hasValue(hass, cfg.entity_peak);
-    els.footPeak.classList.toggle("hidden", !showPeak);
-    if (showPeak) els.vPeak.textContent = fmtTemp(hass, cfg.entity_peak);
-
-    const showElapsed = cfg.entity_elapsed && hasValue(hass, cfg.entity_elapsed);
-    els.footElapsed.classList.toggle("hidden", !showElapsed);
-    if (showElapsed) els.vElapsed.textContent = getState(hass, cfg.entity_elapsed);
-
-    const showRemaining =
-      cfg.entity_remaining &&
-      hasValue(hass, cfg.entity_remaining) &&
-      getState(hass, cfg.entity_remaining).toLowerCase() !== "unbekannt";
-    els.footRemaining.classList.toggle("hidden", !showRemaining);
-    if (showRemaining)
-      els.vRemaining.textContent = getState(hass, cfg.entity_remaining);
   }
 }
 
