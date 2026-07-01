@@ -1,21 +1,22 @@
 /**
  * Meater Card
  * A Home Assistant Lovelace custom card that visualizes a Meater meat
- * thermometer probe, inspired by the layout of the official Meater app
- * widget, adapted to Home Assistant's design language.
+ * thermometer probe. Layout inspired by the official Meater app widget,
+ * but built entirely from Home Assistant's own visual language (ha-card,
+ * ha-icon, theme variables) for a clean, native, non-square look.
  *
  * Repository / distribution: HACS (Lovelace plugin)
  */
 
-const CARD_VERSION = "1.0.0";
+const CARD_VERSION = "2.0.0";
 const CARD_TAG = "meater-card";
 const EDITOR_TAG = "meater-card-editor";
 
 /* eslint-disable no-console */
 console.info(
   `%c METEAR-CARD %c v${CARD_VERSION} `,
-  "color: white; background: #b8266b; font-weight: 700;",
-  "color: #b8266b; background: white; font-weight: 700;"
+  "color: white; background: #44739e; font-weight: 700;",
+  "color: #44739e; background: white; font-weight: 700;"
 );
 
 /* -------------------------------------------------------------------- */
@@ -74,7 +75,6 @@ class MeaterCard extends HTMLElement {
       id.startsWith("sensor.meater_probe_")
     );
 
-    // Try to find a common device prefix, e.g. sensor.meater_probe_c40cca86
     let prefix = null;
     for (const id of ids) {
       const m = id.match(/^(sensor\.meater_probe_[^_]+)_/);
@@ -145,7 +145,7 @@ class MeaterCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 4;
+    return 3;
   }
 
   connectedCallback() {
@@ -164,183 +164,208 @@ class MeaterCard extends HTMLElement {
           display: block;
         }
         ha-card {
-          padding: 16px 16px 12px 16px;
+          padding: 12px 16px 14px 16px;
           overflow: hidden;
         }
+
+        /* ---- Header ---- */
         .header {
           display: flex;
-          align-items: baseline;
+          align-items: center;
           justify-content: space-between;
-          margin-bottom: 4px;
+          gap: 8px;
+          margin-bottom: 10px;
+        }
+        .header-text {
+          min-width: 0;
         }
         .brand {
           font-size: 11px;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           color: var(--secondary-text-color);
-          font-weight: 600;
-        }
-        .status-chip {
-          font-size: 11px;
-          padding: 2px 8px;
-          border-radius: 999px;
-          background: var(--secondary-background-color, rgba(127,127,127,0.15));
-          color: var(--secondary-text-color);
+          font-weight: 500;
         }
         .title {
-          font-size: 22px;
-          font-weight: 600;
-          color: var(--primary-text-color);
-          margin: 2px 0 14px 0;
-          line-height: 1.2;
+          font-size: 1.2em;
+          font-weight: 500;
+          color: var(--ha-card-header-color, var(--primary-text-color));
+          line-height: 1.3;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
-        .body {
+        .status-chip {
+          flex: 0 0 auto;
+          font-size: 12px;
+          font-weight: 500;
+          padding: 3px 10px;
+          border-radius: 12px;
+          background: var(--secondary-background-color, rgba(127,127,127,0.15));
+          color: var(--secondary-text-color);
+          white-space: nowrap;
+        }
+
+        /* ---- Metrics row ---- */
+        .metrics {
           display: flex;
-          align-items: center;
-          gap: 8px;
+          align-items: stretch;
         }
-        .circles {
+        .metric {
+          flex: 1 1 0;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          flex: 0 0 auto;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 2px;
+          min-width: 0;
         }
-        .circle {
-          width: 62px;
-          height: 62px;
+        .metric + .metric {
+          border-left: 1px solid var(--divider-color, rgba(127,127,127,0.15));
+        }
+        .metric-icon {
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          flex-direction: column;
-          color: #fff;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+          background: rgba(var(--rgb-primary-color, 3, 169, 244), 0.12);
         }
-        .circle .val {
-          font-size: 15px;
-          font-weight: 700;
-          line-height: 1.1;
+        .metric-icon ha-icon {
+          --mdc-icon-size: 20px;
+          color: var(--primary-color);
         }
-        .circle-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .circle-label {
-          font-size: 12px;
-          color: var(--secondary-text-color);
-          min-width: 46px;
-        }
-        .circle.innen { background: linear-gradient(135deg, #c026a3, #7c1f9e); }
-        .circle.ziel  { background: linear-gradient(135deg, #3d9bf5, #2265d6); }
-        .circle.aussen{ background: linear-gradient(135deg, #3fc76e, #1f9e4c); }
-
-        .gauge-wrap {
-          flex: 1 1 auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-width: 0;
-        }
-        .gauge-wrap svg {
-          width: 100%;
-          height: auto;
-          overflow: visible;
-        }
-        .center-text {
-          text-align: center;
-          margin-top: -34px;
-        }
-        .center-text .line1 {
-          font-size: 13px;
+        .metric-value {
+          font-size: 16px;
           font-weight: 600;
           color: var(--primary-text-color);
+          line-height: 1.1;
         }
-        .center-text .line2 {
+        .metric-label {
           font-size: 11px;
           color: var(--secondary-text-color);
-          margin-top: 2px;
         }
+
+        /* ---- Progress ---- */
+        .progress-section {
+          margin-top: 14px;
+        }
+        .progress-status {
+          text-align: center;
+          font-size: 13px;
+          color: var(--primary-text-color);
+          margin-bottom: 8px;
+        }
+        .progress-status .sub {
+          display: block;
+          font-size: 11px;
+          color: var(--secondary-text-color);
+          margin-top: 1px;
+          font-weight: 400;
+        }
+        .progress-track {
+          position: relative;
+          height: 8px;
+          border-radius: 4px;
+          background: var(--divider-color, rgba(127,127,127,0.25));
+          margin: 0 4px;
+        }
+        .progress-fill {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 0%;
+          border-radius: 4px;
+          background: var(--primary-color);
+          transition: width 0.4s ease;
+        }
+        .progress-target {
+          position: absolute;
+          top: -3px;
+          width: 2px;
+          height: 14px;
+          border-radius: 1px;
+          background: var(--primary-text-color);
+          opacity: 0.6;
+          transform: translateX(-1px);
+        }
+
+        /* ---- Footer ---- */
         .footer {
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
+          gap: 18px;
           margin-top: 12px;
           padding-top: 10px;
-          border-top: 1px solid var(--divider-color, rgba(127,127,127,0.2));
+          border-top: 1px solid var(--divider-color, rgba(127,127,127,0.15));
         }
         .footer-item {
-          text-align: center;
-          flex: 1;
+          display: flex;
+          align-items: baseline;
+          gap: 4px;
+          font-size: 12px;
         }
         .footer-item .flabel {
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
           color: var(--secondary-text-color);
         }
         .footer-item .fvalue {
-          font-size: 13px;
-          font-weight: 600;
           color: var(--primary-text-color);
-          margin-top: 2px;
+          font-weight: 500;
         }
         .hidden { display: none !important; }
       </style>
       <ha-card>
         <div class="header">
-          <span class="brand" id="brand">Meater</span>
-          <span class="status-chip" id="status"></span>
-        </div>
-        <div class="title" id="title">Meater</div>
-        <div class="body">
-          <div class="circles">
-            <div class="circle-row">
-              <div class="circle innen"><span class="val" id="v-innen">–</span></div>
-              <span class="circle-label">Innen</span>
-            </div>
-            <div class="circle-row">
-              <div class="circle ziel"><span class="val" id="v-ziel">–</span></div>
-              <span class="circle-label">Ziel</span>
-            </div>
-            <div class="circle-row" id="row-aussen">
-              <div class="circle aussen"><span class="val" id="v-aussen">–</span></div>
-              <span class="circle-label">Außen</span>
-            </div>
+          <div class="header-text">
+            <div class="brand" id="brand">Meater</div>
+            <div class="title" id="title">Meater</div>
           </div>
-          <div class="gauge-wrap">
-            <svg id="gauge" viewBox="0 0 210 130" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <linearGradient id="track-gradient" x1="10" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#4a2882"/>
-                  <stop offset="30%" stop-color="#b8266b"/>
-                  <stop offset="55%" stop-color="#e6483f"/>
-                  <stop offset="80%" stop-color="#f6a623"/>
-                  <stop offset="100%" stop-color="#ffe066"/>
-                </linearGradient>
-              </defs>
-              <path id="track-bg" fill="none" stroke="var(--divider-color, rgba(127,127,127,0.25))" stroke-width="10" stroke-linecap="round"/>
-              <path id="track-fill" fill="none" stroke="url(#track-gradient)" stroke-width="10" stroke-linecap="round"/>
-              <polygon id="marker-target" points="0,-8 7,5 -7,5" fill="#2a9df4" stroke="var(--card-background-color, #fff)" stroke-width="1.5"/>
-              <polygon id="marker-current" points="0,-8 7,5 -7,5" fill="#c026a3" stroke="var(--card-background-color, #fff)" stroke-width="1.5"/>
-            </svg>
-            <div class="center-text">
-              <div class="line1" id="center-line1">Garzeit wird abgeschätzt</div>
-              <div class="line2" id="center-line2"></div>
-            </div>
+          <span class="status-chip hidden" id="status"></span>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-icon"><ha-icon icon="mdi:thermometer"></ha-icon></div>
+            <div class="metric-value" id="v-innen">–</div>
+            <div class="metric-label">Innen</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon"><ha-icon icon="mdi:thermometer-check"></ha-icon></div>
+            <div class="metric-value" id="v-ziel">–</div>
+            <div class="metric-label">Ziel</div>
+          </div>
+          <div class="metric" id="metric-aussen">
+            <div class="metric-icon"><ha-icon icon="mdi:grill-outline"></ha-icon></div>
+            <div class="metric-value" id="v-aussen">–</div>
+            <div class="metric-label">Außen</div>
           </div>
         </div>
+
+        <div class="progress-section">
+          <div class="progress-status">
+            <span id="center-line1">Garzeit wird abgeschätzt</span>
+            <span class="sub" id="center-line2"></span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+            <div class="progress-target" id="progress-target"></div>
+          </div>
+        </div>
+
         <div class="footer" id="footer">
           <div class="footer-item hidden" id="foot-peak">
-            <div class="flabel">Spitze</div>
-            <div class="fvalue" id="v-peak">–</div>
+            <ha-icon icon="mdi:thermometer-high" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
+            <span class="fvalue" id="v-peak">–</span>
           </div>
           <div class="footer-item hidden" id="foot-elapsed">
-            <div class="flabel">Verstrichen</div>
-            <div class="fvalue" id="v-elapsed">–</div>
+            <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
+            <span class="fvalue" id="v-elapsed">–</span>
           </div>
           <div class="footer-item hidden" id="foot-remaining">
-            <div class="flabel">Verbleibend</div>
-            <div class="fvalue" id="v-remaining">–</div>
+            <ha-icon icon="mdi:timer-sand" style="--mdc-icon-size:14px; color: var(--secondary-text-color);"></ha-icon>
+            <span class="fvalue" id="v-remaining">–</span>
           </div>
         </div>
       </ha-card>
@@ -352,11 +377,9 @@ class MeaterCard extends HTMLElement {
       vInnen: root.getElementById("v-innen"),
       vZiel: root.getElementById("v-ziel"),
       vAussen: root.getElementById("v-aussen"),
-      rowAussen: root.getElementById("row-aussen"),
-      trackBg: root.getElementById("track-bg"),
-      trackFill: root.getElementById("track-fill"),
-      markerTarget: root.getElementById("marker-target"),
-      markerCurrent: root.getElementById("marker-current"),
+      metricAussen: root.getElementById("metric-aussen"),
+      progressFill: root.getElementById("progress-fill"),
+      progressTarget: root.getElementById("progress-target"),
       centerLine1: root.getElementById("center-line1"),
       centerLine2: root.getElementById("center-line2"),
       footPeak: root.getElementById("foot-peak"),
@@ -370,67 +393,23 @@ class MeaterCard extends HTMLElement {
   }
 
   /* ---------------------------------------------------------------- */
-  /*  Gauge geometry                                                   */
+  /*  Progress bar                                                     */
   /* ---------------------------------------------------------------- */
 
-  _pointAtPct(p, cx, cy, r) {
-    const angle = Math.PI - p * Math.PI;
-    return {
-      x: cx + r * Math.cos(angle),
-      y: cy - r * Math.sin(angle),
-    };
-  }
-
-  _updateGauge(currentVal, targetVal) {
-    const cx = 105;
-    const cy = 115;
-    const r = 90;
+  _updateProgress(currentVal, targetVal) {
     const min = this._config.gauge_min;
     const max = this._config.gauge_max;
 
-    const left = this._pointAtPct(0, cx, cy, r);
-    const right = this._pointAtPct(1, cx, cy, r);
-    this._els.trackBg.setAttribute(
-      "d",
-      `M ${left.x} ${left.y} A ${r} ${r} 0 0 1 ${right.x} ${right.y}`
-    );
-
     const curPct =
       currentVal === null ? 0 : clamp((currentVal - min) / (max - min), 0, 1);
-    const curPoint = this._pointAtPct(curPct, cx, cy, r);
-    const largeArc = curPct > 0.5 ? 1 : 0;
-
-    if (currentVal === null || curPct <= 0.001) {
-      this._els.trackFill.setAttribute("d", "");
-    } else {
-      this._els.trackFill.setAttribute(
-        "d",
-        `M ${left.x} ${left.y} A ${r} ${r} 0 ${largeArc} 1 ${curPoint.x} ${curPoint.y}`
-      );
-    }
-
-    const curRot = 180 * curPct - 90;
-    if (currentVal === null) {
-      this._els.markerCurrent.setAttribute("class", "hidden");
-    } else {
-      this._els.markerCurrent.removeAttribute("class");
-      this._els.markerCurrent.setAttribute(
-        "transform",
-        `translate(${curPoint.x},${curPoint.y}) rotate(${curRot})`
-      );
-    }
+    this._els.progressFill.style.width = `${curPct * 100}%`;
 
     if (targetVal === null) {
-      this._els.markerTarget.setAttribute("class", "hidden");
+      this._els.progressTarget.classList.add("hidden");
     } else {
       const tgtPct = clamp((targetVal - min) / (max - min), 0, 1);
-      const tgtPoint = this._pointAtPct(tgtPct, cx, cy, r);
-      const tgtRot = 180 * tgtPct - 90;
-      this._els.markerTarget.removeAttribute("class");
-      this._els.markerTarget.setAttribute(
-        "transform",
-        `translate(${tgtPoint.x},${tgtPoint.y}) rotate(${tgtRot})`
-      );
+      this._els.progressTarget.classList.remove("hidden");
+      this._els.progressTarget.style.left = `${tgtPct * 100}%`;
     }
   }
 
@@ -446,11 +425,7 @@ class MeaterCard extends HTMLElement {
 
     // Brand / title
     els.brand.textContent = cfg.title_label || "Meater";
-    if (cfg.show_brand === false) {
-      els.brand.classList.add("hidden");
-    } else {
-      els.brand.classList.remove("hidden");
-    }
+    els.brand.classList.toggle("hidden", cfg.show_brand === false);
 
     const foodName =
       (cfg.entity_name && getState(hass, cfg.entity_name)) ||
@@ -458,33 +433,30 @@ class MeaterCard extends HTMLElement {
       cfg.title ||
       "Meater";
     els.title.textContent = foodName;
+    els.title.title = foodName;
 
     // Status chip
     const status = cfg.entity_status ? getState(hass, cfg.entity_status) : null;
-    if (status) {
-      els.status.textContent = status;
-      els.status.classList.remove("hidden");
-    } else {
-      els.status.classList.add("hidden");
-    }
+    els.status.classList.toggle("hidden", !status);
+    if (status) els.status.textContent = status;
 
-    // Circles
+    // Metrics
     els.vInnen.textContent = fmtTemp(hass, cfg.entity_innen);
     els.vZiel.textContent = fmtTemp(hass, cfg.entity_ziel);
 
     if (cfg.entity_aussen) {
-      els.rowAussen.classList.remove("hidden");
+      els.metricAussen.classList.remove("hidden");
       els.vAussen.textContent = fmtTemp(hass, cfg.entity_aussen);
     } else {
-      els.rowAussen.classList.add("hidden");
+      els.metricAussen.classList.add("hidden");
     }
 
-    // Gauge
+    // Progress
     const innenVal = getNumeric(hass, cfg.entity_innen);
     const zielVal = getNumeric(hass, cfg.entity_ziel);
-    this._updateGauge(innenVal, zielVal);
+    this._updateProgress(innenVal, zielVal);
 
-    // Center text
+    // Status text
     const remainingRaw = cfg.entity_remaining
       ? getState(hass, cfg.entity_remaining)
       : null;
@@ -510,30 +482,21 @@ class MeaterCard extends HTMLElement {
     }
 
     // Footer
-    if (cfg.entity_peak && hasValue(hass, cfg.entity_peak)) {
-      els.footPeak.classList.remove("hidden");
-      els.vPeak.textContent = fmtTemp(hass, cfg.entity_peak);
-    } else {
-      els.footPeak.classList.add("hidden");
-    }
+    const showPeak = cfg.entity_peak && hasValue(hass, cfg.entity_peak);
+    els.footPeak.classList.toggle("hidden", !showPeak);
+    if (showPeak) els.vPeak.textContent = fmtTemp(hass, cfg.entity_peak);
 
-    if (cfg.entity_elapsed && hasValue(hass, cfg.entity_elapsed)) {
-      els.footElapsed.classList.remove("hidden");
-      els.vElapsed.textContent = getState(hass, cfg.entity_elapsed);
-    } else {
-      els.footElapsed.classList.add("hidden");
-    }
+    const showElapsed = cfg.entity_elapsed && hasValue(hass, cfg.entity_elapsed);
+    els.footElapsed.classList.toggle("hidden", !showElapsed);
+    if (showElapsed) els.vElapsed.textContent = getState(hass, cfg.entity_elapsed);
 
-    if (
+    const showRemaining =
       cfg.entity_remaining &&
       hasValue(hass, cfg.entity_remaining) &&
-      getState(hass, cfg.entity_remaining).toLowerCase() !== "unbekannt"
-    ) {
-      els.footRemaining.classList.remove("hidden");
+      getState(hass, cfg.entity_remaining).toLowerCase() !== "unbekannt";
+    els.footRemaining.classList.toggle("hidden", !showRemaining);
+    if (showRemaining)
       els.vRemaining.textContent = getState(hass, cfg.entity_remaining);
-    } else {
-      els.footRemaining.classList.add("hidden");
-    }
   }
 }
 
@@ -683,7 +646,7 @@ window.customCards.push({
   type: CARD_TAG,
   name: "Meater Card",
   description:
-    "Zeigt einen Meater Fleischthermometer-Fühler im Stil der Meater-App an.",
+    "Zeigt einen Meater Fleischthermometer-Fühler kompakt im nativen Home-Assistant-Design an.",
   preview: false,
   documentationURL:
     "https://github.com/YOUR_GITHUB_USER/meater-card",
