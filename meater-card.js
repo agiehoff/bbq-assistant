@@ -152,11 +152,17 @@ class MeaterCard extends HTMLElement {
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
     }
+    if (this._config && this._hass) {
+      this._render();
+    }
   }
 
   /* ---------------------------------------------------------------- */
 
   _buildSkeleton() {
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: "open" });
+    }
     const root = this.shadowRoot;
     root.innerHTML = `
       <style>
