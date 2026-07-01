@@ -53,8 +53,8 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-function fmtDuration(seconds) {
-  const s = Math.round(parseFloat(seconds));
+function fmtSeconds(s) {
+  s = Math.round(s);
   if (isNaN(s) || s < 0) return "–";
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
@@ -62,6 +62,18 @@ function fmtDuration(seconds) {
   if (h > 0) return `${h} Std. ${m} Min.`;
   if (m > 0) return `${m} Min. ${sec} Sek.`;
   return `${sec} Sek.`;
+}
+
+function fmtElapsed(raw) {
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return fmtSeconds(parseFloat(raw));
+  return fmtSeconds(Math.max(0, (Date.now() - d.getTime()) / 1000));
+}
+
+function fmtRemaining(raw) {
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return fmtSeconds(parseFloat(raw));
+  return fmtSeconds(Math.max(0, (d.getTime() - Date.now()) / 1000));
 }
 
 function fmtTemp(hass, entityId, fallback = "–") {
@@ -443,14 +455,14 @@ class MeaterCard extends HTMLElement {
       remainingRaw &&
       !["unbekannt", "unknown", "0"].includes(remainingRaw.toLowerCase())
     ) {
-      els.centerLine1.textContent = `Noch ${fmtDuration(remainingRaw)}`;
+      els.centerLine1.textContent = `Noch ${fmtRemaining(remainingRaw)}`;
       els.centerLine2.textContent =
         innenVal !== null && zielVal !== null
           ? `${fmtTemp(hass, cfg.entity_innen)} von ${fmtTemp(hass, cfg.entity_ziel)}`
           : "";
     } else if (elapsedRaw) {
       els.centerLine1.textContent = "Garzeit wird abgeschätzt";
-      els.centerLine2.textContent = `Seit ${elapsedRaw}`;
+      els.centerLine2.textContent = `Seit ${fmtElapsed(elapsedRaw)}`;
     } else {
       els.centerLine1.textContent = "Garzeit wird abgeschätzt";
       els.centerLine2.textContent = "";
