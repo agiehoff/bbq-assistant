@@ -92,72 +92,46 @@ class MeaterCard extends HTMLElement {
     return document.createElement(EDITOR_TAG);
   }
 
-  static getStubConfig(hass) {
+  static getStubConfig() {
+    return { type: `custom:${CARD_TAG}` };
+  }
+
+  _discoverEntities(hass) {
     const states = (hass && hass.states) || {};
-    const ids = Object.keys(states).filter((id) =>
-      id.startsWith("sensor.meater_probe_")
-    );
+    const cfg = this._config;
 
+    // If all mandatory fields are explicitly set, use them as-is
+    if (cfg.entity_innen && cfg.entity_ziel) return cfg;
+
+    // Find first Meater probe prefix in hass states
     let prefix = null;
-    for (const id of ids) {
+    for (const id of Object.keys(states)) {
       const m = id.match(/^(sensor\.meater_probe_[^_]+)_/);
-      if (m) {
-        prefix = m[1];
-        break;
-      }
+      if (m) { prefix = m[1]; break; }
     }
+    if (!prefix) return cfg;
 
-    if (!prefix) {
-      return {
-        type: `custom:${CARD_TAG}`,
-        entity_innen: "",
-        entity_ziel: "",
-        entity_aussen: "",
-        entity_name: "",
-        entity_status: "",
-        entity_remaining: "",
-        entity_elapsed: "",
-        entity_peak: "",
-      };
-    }
-
-    const pick = (suffix) =>
-      states[`${prefix}_${suffix}`] ? `${prefix}_${suffix}` : "";
+    const pick = (key, suffix) =>
+      cfg[key] || (states[`${prefix}_${suffix}`] ? `${prefix}_${suffix}` : "");
 
     return {
-      type: `custom:${CARD_TAG}`,
-      entity_innen: pick("innentemperatur"),
-      entity_ziel: pick("soll_temperatur"),
-      entity_aussen: pick("umgebungstemperatur"),
-      entity_name: pick("kocht"),
-      entity_status: pick("kochstatus"),
-      entity_remaining: pick("verbleibende_zeit"),
-      entity_elapsed: pick("verstrichene_zeit"),
-      entity_peak: pick("spitzentemperatur"),
+      ...cfg,
+      entity_innen:    pick("entity_innen",    "innentemperatur"),
+      entity_ziel:     pick("entity_ziel",     "soll_temperatur"),
+      entity_aussen:   pick("entity_aussen",   "umgebungstemperatur"),
+      entity_name:     pick("entity_name",     "kocht"),
+      entity_status:   pick("entity_status",   "kochstatus"),
+      entity_remaining:pick("entity_remaining","verbleibende_zeit"),
+      entity_elapsed:  pick("entity_elapsed",  "verstrichene_zeit"),
+      entity_peak:     pick("entity_peak",     "spitzentemperatur"),
     };
   }
 
   setConfig(config) {
-    if (!config) {
-      throw new Error("Ungültige Konfiguration");
-    }
-    if (!config.entity_innen || !config.entity_ziel) {
-      throw new Error(
-        "meater-card: 'entity_innen' und 'entity_ziel' müssen konfiguriert sein."
-      );
-    }
-
-    this._config = {
-      gauge_min: 0,
-      gauge_max: 100,
-      show_brand: true,
-      ...config,
-    };
+    if (!config) throw new Error("Ungültige Konfiguration");
+    this._config = { gauge_min: 0, gauge_max: 100, ...config };
     this._built = false;
-
-    if (this._hass) {
-      this._render();
-    }
+    if (this._hass) this._render();
   }
 
   set hass(hass) {
@@ -398,7 +372,7 @@ class MeaterCard extends HTMLElement {
     if (!this._built) this._buildSkeleton();
 
     const hass = this._hass;
-    const cfg = this._config;
+    const cfg = this._discoverEntities(hass);
     const els = this._els;
 
     const foodName =
