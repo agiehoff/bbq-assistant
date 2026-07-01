@@ -208,13 +208,6 @@ class MeaterCard extends HTMLElement {
         .header-text {
           min-width: 0;
         }
-        .brand {
-          font-size: 11px;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: var(--secondary-text-color);
-          font-weight: 500;
-        }
         .title {
           font-size: 1.2em;
           font-weight: 500;
@@ -326,7 +319,6 @@ class MeaterCard extends HTMLElement {
       <ha-card>
         <div class="header">
           <div class="header-text">
-            <div class="brand" id="brand">Meater</div>
             <div class="title" id="title">Meater</div>
           </div>
           <span class="status-chip hidden" id="status"></span>
@@ -364,7 +356,6 @@ class MeaterCard extends HTMLElement {
       </ha-card>
     `;
     this._els = {
-      brand: root.getElementById("brand"),
       status: root.getElementById("status"),
       title: root.getElementById("title"),
       vInnen: root.getElementById("v-innen"),
@@ -409,10 +400,6 @@ class MeaterCard extends HTMLElement {
     const hass = this._hass;
     const cfg = this._config;
     const els = this._els;
-
-    // Brand / title
-    els.brand.textContent = cfg.title_label || "Meater";
-    els.brand.classList.toggle("hidden", cfg.show_brand === false);
 
     const foodName =
       (cfg.entity_name && getState(hass, cfg.entity_name)) ||
