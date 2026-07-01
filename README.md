@@ -1,72 +1,69 @@
 # Meater Card
 
 Eine Lovelace-Karte für Home Assistant, die einen **Meater**-Fleischthermometer-Fühler
-im Stil des offiziellen Meater-App-Widgets darstellt – visuell jedoch an das
-Home-Assistant-Design angepasst (Farben passen sich automatisch an
-Light-/Dark-Theme an, `ha-card`-Look, native Editor-UI).
-
-![Vorschau](https://raw.githubusercontent.com/YOUR_GITHUB_USER/meater-card/main/preview.png)
+kompakt im nativen Home-Assistant-Design darstellt – Farben passen sich automatisch an
+Light-/Dark-Theme an.
 
 ## Funktionen
 
-- Drei farbige Kreise für **Innentemperatur**, **Ziel-Temperatur** und
-  **Umgebungstemperatur** (analog zum App-Widget)
-- Halbrundes Gauge mit Farbverlauf, aktuellem Fortschritts-Pfeil und
-  Ziel-Marker
-- Anzeige von Gericht/Name, Kochstatus, verbleibender/verstrichener Zeit
-  und Spitzentemperatur (alles optional)
-- **Alle Entitäten sind über den grafischen Karten-Editor konfigurierbar** –
-  kein manuelles YAML notwendig
-- Kompatibel mit der HACS Waste/Meater-Integrationsstruktur
-  (`sensor.meater_probe_<id>_...`), funktioniert aber mit beliebigen
-  Entitäten, die passende Werte liefern
+- Automatische Erkennung des Meater-Geräts – **keine Entitäts-IDs in der Konfiguration notwendig**
+- Anzeige von Innentemperatur, Ziel-Temperatur und Umgebungstemperatur
+- Linearer Fortschrittsbalken mit aktuellem Stand und Ziel-Marker
+- Verbleibende oder verstrichene Garzeit als lesbare Dauer (z. B. `23 Min. 12 Sek.`)
+- Statusanzeige oben rechts (z. B. Kochstatus)
+- Passt sich automatisch an, falls ein neues Meater-Gerät mit anderer ID eingerichtet wird
 
 ## Installation über HACS
 
 1. HACS → Frontend → Menü (⋮) → **Benutzerdefinierte Repositories**
-2. Repository-URL dieses Projekts eintragen, Kategorie **Lovelace**
-   auswählen, hinzufügen
+2. Repository-URL dieses Projekts eintragen, Kategorie **Lovelace** auswählen, hinzufügen
 3. „Meater Card" in HACS suchen und installieren
-4. Home Assistant neu laden (Browser-Cache leeren, falls die Karte nicht
-   sofort erscheint)
+4. Home Assistant neu laden (Browser-Cache leeren, falls die Karte nicht sofort erscheint)
 
-Manuelle Installation (ohne HACS): `meater-card.js` nach
-`config/www/` kopieren und als Lovelace-Ressource
-(`/local/meater-card.js`, Typ **JavaScript-Modul**) hinzufügen.
+Manuelle Installation (ohne HACS): `meater-card.js` nach `config/www/` kopieren und als
+Lovelace-Ressource (`/local/meater-card.js`, Typ **JavaScript-Modul**) hinzufügen.
 
 ## Verwendung
 
-Karte über **Karte hinzufügen → Meater Card** hinzufügen und im Editor die
-gewünschten Entitäten auswählen, oder per YAML:
+### Minimalkonfiguration (empfohlen)
+
+Die Karte erkennt das Meater-Gerät automatisch:
 
 ```yaml
 type: custom:meater-card
-entity_innen: sensor.meater_probe_c40cca86_innentemperatur
-entity_ziel: sensor.meater_probe_c40cca86_soll_temperatur
-entity_aussen: sensor.meater_probe_c40cca86_umgebungstemperatur
-entity_name: sensor.meater_probe_c40cca86_kocht
-entity_status: sensor.meater_probe_c40cca86_kochstatus
-entity_remaining: sensor.meater_probe_c40cca86_verbleibende_zeit
-entity_elapsed: sensor.meater_probe_c40cca86_verstrichene_zeit
-entity_peak: sensor.meater_probe_c40cca86_spitzentemperatur
+```
+
+### Mit expliziten Entitäten (optional)
+
+Entitäten können manuell überschrieben werden, z. B. wenn mehrere Fühler vorhanden sind:
+
+```yaml
+type: custom:meater-card
+entity_innen: sensor.meater_probe_<id>_innentemperatur
+entity_ziel: sensor.meater_probe_<id>_soll_temperatur
+entity_aussen: sensor.meater_probe_<id>_umgebungstemperatur
+entity_name: sensor.meater_probe_<id>_kocht
+entity_status: sensor.meater_probe_<id>_kochstatus
+entity_remaining: sensor.meater_probe_<id>_verbleibende_zeit
+entity_elapsed: sensor.meater_probe_<id>_verstrichene_zeit
+entity_peak: sensor.meater_probe_<id>_spitzentemperatur
 ```
 
 ### Konfigurationsoptionen
 
-| Option              | Pflicht | Beschreibung                                            |
-|---------------------|:-------:|-----------------------------------------------------------|
-| `entity_innen`      | ✅      | Sensor für die Innentemperatur des Fühlers                |
-| `entity_ziel`       | ✅      | Sensor für die Soll-/Zieltemperatur                        |
-| `entity_aussen`     |         | Sensor für die Umgebungs-/Ofentemperatur                  |
-| `entity_name`       |         | Sensor, dessen Zustand als Titel/Gericht angezeigt wird (`Kocht`) |
-| `entity_status`     |         | Sensor für den Kochstatus (Chip oben rechts)               |
-| `entity_remaining`  |         | Sensor für die verbleibende Zeit                            |
-| `entity_elapsed`    |         | Sensor für die verstrichene Zeit                             |
-| `entity_peak`       |         | Sensor für die Spitzentemperatur                             |
-| `name`              |         | Überschreibt den Titel, falls `entity_name` nicht gesetzt ist |
-| `gauge_min`         |         | Untergrenze der Gauge-Skala (Standard `0`)                 |
-| `gauge_max`         |         | Obergrenze der Gauge-Skala (Standard `100`)                |
-| `show_brand`        |         | Kleines "Meater"-Label oben links ein-/ausblenden (Standard `true`) |
+| Option               | Beschreibung                                                        |
+|----------------------|---------------------------------------------------------------------|
+| `entity_innen`       | Sensor für die Innentemperatur (überschreibt Auto-Discovery)        |
+| `entity_ziel`        | Sensor für die Soll-/Zieltemperatur (überschreibt Auto-Discovery)   |
+| `entity_aussen`      | Sensor für die Umgebungs-/Ofentemperatur                            |
+| `entity_name`        | Sensor, dessen Zustand als Titel/Gericht angezeigt wird             |
+| `entity_status`      | Sensor für den Kochstatus (Badge oben rechts)                       |
+| `entity_remaining`   | Sensor für die verbleibende Zeit (ISO-Timestamp oder Sekunden)      |
+| `entity_elapsed`     | Sensor für die verstrichene Zeit (ISO-Timestamp oder Sekunden)      |
+| `entity_peak`        | Sensor für die Spitzentemperatur                                    |
+| `name`               | Überschreibt den Titel, falls `entity_name` nicht gesetzt ist       |
+| `gauge_min`          | Untergrenze der Fortschrittsanzeige in °C (Standard: `0`)           |
+| `gauge_max`          | Obergrenze der Fortschrittsanzeige in °C (Standard: `100`)          |
 
 ## Lizenz
 

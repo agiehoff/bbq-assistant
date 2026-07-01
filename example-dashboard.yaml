@@ -1,16 +1,17 @@
-# Beispielkonfiguration für die Meater Card
-# Passe die Entitäts-IDs an dein System an (siehe Einstellungen -> Geräte & Dienste
-# -> Meater -> Entitäten, oder nutze den grafischen Karten-Editor).
-
+# Minimalkonfiguration – Gerät wird automatisch erkannt
 type: custom:meater-card
-entity_innen: sensor.meater_probe_c40cca86_innentemperatur
-entity_ziel: sensor.meater_probe_c40cca86_soll_temperatur
-entity_aussen: sensor.meater_probe_c40cca86_umgebungstemperatur
-entity_name: sensor.meater_probe_c40cca86_kocht
-entity_status: sensor.meater_probe_c40cca86_kochstatus
-entity_remaining: sensor.meater_probe_c40cca86_verbleibende_zeit
-entity_elapsed: sensor.meater_probe_c40cca86_verstrichene_zeit
-entity_peak: sensor.meater_probe_c40cca86_spitzentemperatur
-gauge_min: 0
-gauge_max: 100
-show_brand: true
+
+# Optional: Entitäten manuell setzen (z. B. bei mehreren Fühlern)
+# Ersetze <id> mit der Geräte-ID aus Einstellungen → Geräte & Dienste → Meater
+#
+# type: custom:meater-card
+# entity_innen: sensor.meater_probe_<id>_innentemperatur
+# entity_ziel: sensor.meater_probe_<id>_soll_temperatur
+# entity_aussen: sensor.meater_probe_<id>_umgebungstemperatur
+# entity_name: sensor.meater_probe_<id>_kocht
+# entity_status: sensor.meater_probe_<id>_kochstatus
+# entity_remaining: sensor.meater_probe_<id>_verbleibende_zeit
+# entity_elapsed: sensor.meater_probe_<id>_verstrichene_zeit
+# entity_peak: sensor.meater_probe_<id>_spitzentemperatur
+# gauge_min: 0
+# gauge_max: 100
